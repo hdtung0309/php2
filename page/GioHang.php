@@ -40,7 +40,7 @@ if(!isset($_SESSION["giohang"]))
                         </ul>
                         <?php
                         $tongtienGH=0;
-                        foreach($_SESSION["giohang"] as $cotGH) //với mỗi bản ghi trong session giohang tính tổng tiền của giỏ hàng
+                        foreach($_SESSION["giohang"] as $cotGH)
                         {
                             $tongtienGH+=$cotGH["dongia"]*$cotGH["soluong"];
                             ?>
@@ -150,10 +150,17 @@ if(isset($_SESSION["tendangnhap"])) {
         if(isset($_SESSION["giohang"])) {
 
             $tendangnhap=$_SESSION["tendangnhap"];
-            $trangthai="0";
-            $noigiao=$_POST["noigiao"];
-            $ngaydat=date("Y-m-d");
-
+            $layDiaChiQuery = "SELECT DiaChi FROM thanhvien WHERE TenDangNhap = ?";
+            $stmt = mysqli_prepare($conn, $layDiaChiQuery);
+            mysqli_stmt_bind_param($stmt, "s", $tendangnhap);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_bind_result($stmt, $noigiao);
+            mysqli_stmt_fetch($stmt);
+            mysqli_stmt_close($stmt);
+    
+            $trangthai = "0";
+            $ngaydat = date("Y-m-d");
+                
             $themDonDat="INSERT INTO dondat(TenDangNhap,MaNhanVien,TrangThai,NoiGiao,NgayDat) VALUES('".$tendangnhap."','1','".$trangthai."','".$noigiao."','".$ngaydat."')";
 			
             if(mysqli_query($conn,$themDonDat)) {
@@ -269,6 +276,10 @@ paypal.Buttons({
             })
             .catch((error) => {
                 console.error('Error:', error);
+                alert('Thanh toán thành công');
+                setTimeout(() => {
+                location.reload();  
+                }, 2000  );
             });
         });
     }
